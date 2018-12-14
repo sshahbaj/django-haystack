@@ -166,6 +166,7 @@ class SolrSearchBackend(BaseSearchBackend):
         search_kwargs = self.build_search_kwargs(query_string, **kwargs)
 
         try:
+            search_kwargs.pop('df')
             raw_results = self.conn.search(query_string, **search_kwargs)
         except (IOError, SolrError) as e:
             if not self.silently_fail:
@@ -526,7 +527,7 @@ class SolrSearchBackend(BaseSearchBackend):
         indexed_models = unified_index.get_indexed_models()
 
         for raw_result in raw_results.docs:
-            app_label, model_name = raw_result[DJANGO_CT].split(".")
+            app_label, model_name = raw_result[DJANGO_CT][0].split(".")
             additional_fields = {}
             model = haystack_get_model(app_label, model_name)
 
@@ -544,7 +545,7 @@ class SolrSearchBackend(BaseSearchBackend):
                     ):
                         additional_fields[string_key] = index.fields[
                             string_key
-                        ].convert(value)
+                        ].convert(value[0])
                     else:
                         additional_fields[string_key] = self.conn._to_python(value)
 
