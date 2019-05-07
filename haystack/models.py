@@ -70,8 +70,14 @@ class SearchResult(object):
 
     def _get_searchindex(self):
         from haystack import connections
-
-        return connections["default"].get_unified_index().get_index(self.model)
+        try:
+            return connections["default"].get_unified_index().get_index(self.model)
+        except NotHandled:
+            pass
+        try:
+            return connections["users"].get_unified_index().get_index(self.model)
+        except NotHandled:
+            pass
 
     searchindex = property(_get_searchindex)
 
